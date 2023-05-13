@@ -22,7 +22,7 @@ func randRange(min int64, max int64) int64 {
 	return rand.Int63n(max-min) + min
 }
 
-func GenSystem(systems []System) System {
+func GenSystem(systems []*System) System {
     var pnt point.Point
 
 	for {

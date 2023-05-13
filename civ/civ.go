@@ -2,6 +2,8 @@ package civ
 
 import (
 	"fmt"
+	"image/color"
+	"log"
 
 	"github.com/rubensseva/go-dark-forest/point"
 	"golang.org/x/exp/slices"
@@ -9,6 +11,7 @@ import (
 
 type Civ struct {
 	Name             string
+	Color            color.Color
 	TechnologyLevel  int
 	TechnologyGrowth int
 	Population       int
@@ -24,6 +27,14 @@ type System struct {
 	// If nil, indicates unowned
 	Civ *Civ
 	Population int
+
+	// Cached results for rendering, should never be
+	// used in deciding anything
+	Cached struct {
+		BestSys *System
+		BestSysScore float64
+		NeedForExpansion float64
+	}
 }
 
 func (c *Civ) totalResources() int {
@@ -57,7 +68,7 @@ func (c *Civ) totalResources() int {
 // assign a state to each system, and then a set of behaviours that is triggered
 // only from that state. This is complicated by the fact that the "state" encompasses
 // all the neighboring systems, and the state of the entire Civ actually.
-func (c *Civ) CivTic(allSystems []System) {
+func (c *Civ) CivTic(allSystems []*System) {
 	c.TechnologyLevel += c.TechnologyGrowth
 
 	// Store a nice slice so we don't modify the slice while looping
@@ -72,7 +83,7 @@ func (c *Civ) CivTic(allSystems []System) {
 	}
 }
 
-func (s *System) OwnedSystemTic(allSystems []System) {
+func (s *System) OwnedSystemTic(allSystems []*System) {
 	if s.Population == 0 {
 		panic(fmt.Sprintf("pop was zero for system %+v", s))
 	}
@@ -96,7 +107,7 @@ func (s *System) OwnedSystemTic(allSystems []System) {
 	}
 
 	// Now we need sort all the non-owned systems based on systemscore
-	nonOwnedSystems := []System{}
+	nonOwnedSystems := []*System{}
 	for _, ss := range allSystems {
 		if ss.Civ != nil {
 			continue
@@ -106,13 +117,19 @@ func (s *System) OwnedSystemTic(allSystems []System) {
 			ss,
 		)
 	}
-
 	SortSystems(*s, nonOwnedSystems)
 
+	// Are there any systems available at all?
+	// If this there isnt, it means the whole universe is
+	// currently colonized
+	if len(nonOwnedSystems) == 0 {
+		log.Printf("the entire universe is colonized!")
+		return
+	}
 	// Let's get the best candidate for emigration
 	best := nonOwnedSystems[0]
 
-	systemScore := SystemScore(*s, best)
+	systemScore := SystemScore(*s, *best)
 	expandThreshold := 1000.0
 	popresfac := float64(pop) / float64(resources)
 	needForExpansion := popresfac * expandThreshold
@@ -120,11 +137,16 @@ func (s *System) OwnedSystemTic(allSystems []System) {
 	if needForExpansion + systemScore >= expandThreshold {
 		fmt.Printf("expanding civ %v... \n", s.Civ)
 		best.Civ = s.Civ
-		s.Civ.OwnedSystems = append(s.Civ.OwnedSystems, &best)
+		s.Civ.OwnedSystems = append(s.Civ.OwnedSystems, best)
 		colonizingPop := s.Population / 2
 		s.Population -= colonizingPop
 		best.Population = colonizingPop
 	}
+
+	// Update cached data
+	s.Cached.BestSys = best
+	s.Cached.BestSysScore = systemScore
+	s.Cached.NeedForExpansion = needForExpansion
 }
 
 // SystemScore calculates a value for a System.
@@ -133,13 +155,13 @@ func SystemScore(o System, s System) float64 {
 	resources := float64(s.Resources)
 	discoverability := float64(s.Discoverability)
 
-	return resources - distance - discoverability
+	return resources - (distance * (distance / 4)) - discoverability
 }
 
-func SortSystems(o System, systems []System) {
-	sorty := func (s1, s2 System) bool {
-		score1 := SystemScore(o, s1)
-		score2 := SystemScore(o, s2)
+func SortSystems(o System, systems []*System) {
+	sorty := func (s1, s2 *System) bool {
+		score1 := SystemScore(o, *s1)
+		score2 := SystemScore(o, *s2)
 		return score1 > score2
 	}
 	slices.SortFunc(systems, sorty)
