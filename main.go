@@ -31,7 +31,7 @@ func addCiv(game *Game, firstSys *civ.System, civName string, col color.Color) {
 
 func main() {
 	systems := []*civ.System{}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 200; i++ {
 		s := civ.GenSystem(systems)
 		systems = append(systems, &s)
 	}
@@ -53,6 +53,16 @@ func main() {
 	})
 	addCiv(game, systems[2], "larp", color.RGBA{
 		B: 200,
+		A: 255,
+	})
+	addCiv(game, systems[3], "larp", color.RGBA{
+		R: 100,
+		B: 100,
+		A: 255,
+	})
+	addCiv(game, systems[4], "fjolp", color.RGBA{
+		R: 100,
+		G: 100,
 		A: 255,
 	})
 

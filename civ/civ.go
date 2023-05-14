@@ -17,6 +17,12 @@ type Civ struct {
 	OwnedSystems     []*System
 }
 
+type CachedSysVals struct {
+		BestSys *System
+		BestSysScore float64
+		NeedForExpansion float64
+}
+
 type System struct {
 	Name            string
 	Resources       int
@@ -29,11 +35,7 @@ type System struct {
 
 	// Cached results for rendering, should never be
 	// used in deciding anything
-	Cached struct {
-		BestSys *System
-		BestSysScore float64
-		NeedForExpansion float64
-	}
+	Cached CachedSysVals
 }
 
 func (c *Civ) totalResources() int {
@@ -108,7 +110,7 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	// Now we need sort all the non-owned systems based on systemscore
 	nonOwnedSystems := []*System{}
 	for _, ss := range allSystems {
-		if ss.Civ != nil {
+		if ss.Civ == s.Civ {
 			continue
 		}
 		nonOwnedSystems = append(
@@ -126,6 +128,26 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	}
 	// Let's get the best candidate for emigration
 	best := nonOwnedSystems[0]
+
+	// We found a civ! exterminate the system
+	if best.Civ != nil {
+		newOwned := []*System{}
+		for _, os := range best.Civ.OwnedSystems {
+			if os != best {
+				newOwned = append(
+					newOwned,
+					os,
+				)
+			}
+		}
+		best.Civ.OwnedSystems = newOwned
+
+		best.Civ = nil
+		best.Population = 1
+
+		best.Discoverability *= 2
+		best.Cached = CachedSysVals{}
+	}
 
 	systemScore := SystemScore(*s, *best)
 	expandThreshold := 1000.0
