@@ -73,6 +73,31 @@ func main() {
 		}
 		secondSys.Civ = &secondCiv
 
+
+		game.Civs = append(game.Civs, &secondCiv)
+	}
+
+	{
+		c := color.RGBA{
+			R: 0,
+			G: 255,
+			B: 0,
+			A: 255,
+		}
+
+		secondSys := systems[2]
+		// TODO: Extract to function
+		secondSys.Population = 1
+		secondCiv := civ.Civ{
+			Name:             "glorp",
+			Color:            c,
+			TechnologyLevel:  0,
+			TechnologyGrowth: 0,
+			Population:       1,
+			OwnedSystems:     []*civ.System{secondSys},
+		}
+		secondSys.Civ = &secondCiv
+
 		game.Civs = append(game.Civs, &secondCiv)
 	}
 
@@ -89,7 +114,7 @@ func main() {
 		game: game,
 	}
 
-	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowSize(800, 800)
 	ebiten.SetWindowTitle("Hello, World!")
 	if err := ebiten.RunGame(&renderer); err != nil {
 		log.Fatal(err)
