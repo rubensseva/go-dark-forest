@@ -1,29 +1,64 @@
 package main
 
 import (
+	"fmt"
 	"hash/fnv"
 	"image/color"
+	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+
 	"github.com/rubensseva/go-dark-forest/civ"
 )
 
 var (
 	ScreenWidth = 1600
 	ScreenHeight = 1600
+
+	mplusNormalFont font.Face
+	mplusBigFont    font.Face
 )
 
+func init() {
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	const dpi = 72
+	mplusNormalFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    24,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	mplusBigFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    32,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 type Renderer struct{
-	game Game
+	game *Game
 }
 
 func (g *Renderer) Update() error {
 	for _, c := range g.game.Civs {
 		c.CivTic(g.game.Systems)
 	}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	return nil
 }
 
@@ -72,6 +107,23 @@ func renderSystem(screen *ebiten.Image, sys civ.System) {
 	ebitenutil.DrawRect(screen, float64(newX), float64(newY), 5.0, 5.0, col)
 
 	if sys.Cached.BestSys != nil {
+		text.Draw(
+			screen,
+			fmt.Sprintf("%v", int(sys.Cached.BestSysScore)),
+			mplusNormalFont,
+			int(newX),
+			int(newY),
+			color.White,
+		)
+		text.Draw(
+			screen,
+			fmt.Sprintf("%v", int(sys.Population)),
+			mplusNormalFont,
+			int(newX),
+			int(newY) + 30,
+			color.White,
+		)
+
 		xx, yy := convertPoints(sys.Cached.BestSys.Point.X, sys.Cached.BestSys.Point.Y)
 
 		ebitenutil.DrawLine(

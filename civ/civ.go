@@ -3,7 +3,6 @@ package civ
 import (
 	"fmt"
 	"image/color"
-	"log"
 
 	"github.com/rubensseva/go-dark-forest/point"
 	"golang.org/x/exp/slices"
@@ -101,7 +100,7 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 
 	// Now we decide what to do
 	// First: does this system even have a need for emigration?
-	wantsToExpand := (resources - pop) > 0
+	wantsToExpand := resources < pop
 	if !wantsToExpand {
 		return
 	}
@@ -123,7 +122,6 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	// If this there isnt, it means the whole universe is
 	// currently colonized
 	if len(nonOwnedSystems) == 0 {
-		log.Printf("the entire universe is colonized!")
 		return
 	}
 	// Let's get the best candidate for emigration

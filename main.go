@@ -14,6 +14,21 @@ type Game struct {
 	Civs    []*civ.Civ
 }
 
+func addCiv(game *Game, firstSys *civ.System, civName string, col color.Color) {
+	firstSys.Population = 1
+	firstCiv := civ.Civ{
+		Name:             civName,
+		Color:            col,
+		TechnologyLevel:  0,
+		TechnologyGrowth: 0,
+		Population:       1,
+		OwnedSystems:     []*civ.System{firstSys},
+	}
+	firstSys.Civ = &firstCiv
+
+	game.Civs = append(game.Civs, &firstCiv)
+}
+
 func main() {
 	systems := []*civ.System{}
 	for i := 0; i < 100; i++ {
@@ -24,91 +39,22 @@ func main() {
 		fmt.Println(s)
 	}
 
-	game := Game{
+	game := &Game{
 		Systems: systems,
 	}
 
-	{
-		c := color.RGBA{
-			R: 0,
-			G: 0,
-			B: 255,
-			A: 255,
-		}
-
-		firstSys := systems[0]
-		// TODO: Extract to function
-		firstSys.Population = 1
-		firstCiv := civ.Civ{
-			Name:             "schmorp",
-			Color:            c,
-			TechnologyLevel:  0,
-			TechnologyGrowth: 0,
-			Population:       1,
-			OwnedSystems:     []*civ.System{firstSys},
-		}
-		firstSys.Civ = &firstCiv
-
-		game.Civs = append(game.Civs, &firstCiv)
-	}
-
-	{
-		c := color.RGBA{
-			R: 255,
-			G: 0,
-			B: 0,
-			A: 255,
-		}
-
-		secondSys := systems[1]
-		// TODO: Extract to function
-		secondSys.Population = 1
-		secondCiv := civ.Civ{
-			Name:             "larppppp",
-			Color:            c,
-			TechnologyLevel:  0,
-			TechnologyGrowth: 0,
-			Population:       1,
-			OwnedSystems:     []*civ.System{secondSys},
-		}
-		secondSys.Civ = &secondCiv
-
-
-		game.Civs = append(game.Civs, &secondCiv)
-	}
-
-	{
-		c := color.RGBA{
-			R: 0,
-			G: 255,
-			B: 0,
-			A: 255,
-		}
-
-		secondSys := systems[2]
-		// TODO: Extract to function
-		secondSys.Population = 1
-		secondCiv := civ.Civ{
-			Name:             "glorp",
-			Color:            c,
-			TechnologyLevel:  0,
-			TechnologyGrowth: 0,
-			Population:       1,
-			OwnedSystems:     []*civ.System{secondSys},
-		}
-		secondSys.Civ = &secondCiv
-
-		game.Civs = append(game.Civs, &secondCiv)
-	}
-
-	// for i := 0; i < 100; i++ {
-	// 	fmt.Println("printinng...")
-	// 	for _, s := range firstCiv.OwnedSystems {
-	// 		fmt.Printf("sys: %+v\n", *s)
-	// 	}
-	// 	fmt.Println("done")
-	// 	firstCiv.CivTic(systems)
-	// }
+	addCiv(game, systems[0], "schmorp", color.RGBA{
+		R: 255,
+		A: 255,
+	})
+	addCiv(game, systems[1], "glorp", color.RGBA{
+		G: 200,
+		A: 255,
+	})
+	addCiv(game, systems[2], "larp", color.RGBA{
+		B: 200,
+		A: 255,
+	})
 
 	renderer := Renderer{
 		game: game,
