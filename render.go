@@ -46,40 +46,23 @@ func hash(s string) uint32 {
 
 
 func convertPoints(x, y int64) (float64, float64) {
-	// xdiff := civ.MinX * (-1)
-	// ydiff := civ.MinY * (-1)
-
-	// fmt.Printf("x, y: %v, %v\n", x, y)
+	// Assuming minx and miny is negative
 	newX := float64(x + (civ.MinX * (-1)))
 	newY := float64(y + (civ.MinY * (-1)))
-
-	// fmt.Printf("new x, y: %v, %v\n", newX, newY)
 
 	facX := newX / (float64(civ.MaxX) + (float64(civ.MinX) * (-1)))
 	facY := newY / (float64(civ.MaxY) + (float64(civ.MinY) * (-1)))
 
-	// fmt.Printf("fac x, y: %v, %v\n", facX, facY)
-
 	resX, resY := float64(ScreenWidth) * facX, float64(ScreenHeight) * facY
-
-	// fmt.Printf("res x, y: %v, %v\n", resX, resY)
-
 	return resX, resY
 }
 
 func renderSystem(screen *ebiten.Image, sys civ.System) {
-	// Assuming minx and miny is negative
 	newX, newY := convertPoints(sys.Point.X, sys.Point.Y)
 
 	var col color.Color
 	if sys.Civ != nil {
 		col = sys.Civ.Color
-		// col = color.RGBA64{
-		// 	R: uint16(hash(sys.Civ.Name)),
-		// 	G: uint16(hash(sys.Civ.Name)) % 32,
-		// 	B: uint16(hash(sys.Civ.Name)) % 10000,
-		// 	A: 255,
-		// }
 	} else {
 		col = color.Gray{
 			Y: 255,
