@@ -87,11 +87,29 @@ func expand(expanding *System, target *System) {
 
 // systemScore calculates a value for a System.
 func systemScore(o System, s System) float64 {
-	distance := o.Point.Sub(s.Point).VecLen()
+	_distance := o.Point.Sub(s.Point).VecLen()
 	resources := float64(s.Resources)
 	discoverability := float64(s.Discoverability)
 
-	return resources - (distance * (distance / 4)) - discoverability
+	distance := _distance * (_distance / 4)
+
+	// Do some checks to avoid overflows
+	if distance > resources {
+		return 0
+	}
+	if discoverability > resources {
+		return 0
+	}
+	if (distance + discoverability) > resources {
+		return 0
+	}
+
+	res := resources - distance - discoverability
+	if res < 0 {
+		res = 0
+	}
+
+	return res
 }
 
 func sortSystems(o System, systems []*System) {
@@ -111,19 +129,19 @@ func GenSystem(systems []*System) System {
 			X: randRange(MinXAndY, MaxXAndY),
 			Y: randRange(MinXAndY, MaxXAndY),
 		}
-		toclose := false
-		for _, s := range systems {
-			lenn := newP.Sub(s.Point).VecLen()
-			if lenn < 10.0 {
-				fmt.Printf("%v is too close to %v\n", newP, s.Point)
-				toclose = true
-				break
-			}
-		}
+		// toclose := false
+		// for _, s := range systems {
+		// 	lenn := newP.Sub(s.Point).VecLen()
+		// 	if lenn < 2.0 {
+		// 		fmt.Printf("%v is too close to %v\n", newP, s.Point)
+		// 		toclose = true
+		// 		break
+		// 	}
+		// }
 
-		if toclose {
-			continue
-		}
+		// if toclose {
+		// 	continue
+		// }
 
 		pnt = newP
 		break

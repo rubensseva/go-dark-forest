@@ -1,15 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"hash/fnv"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -57,7 +54,7 @@ func (g *Renderer) Update() error {
 	newCivs := make([]*darkforest.Civ, 0, len(g.game.Civs))
 	for _, c := range g.game.Civs {
 		if len(c.OwnedSystems) == 0 {
-			fmt.Printf("civ %v was exterminated\n", c.Name)
+			// fmt.Printf("civ %v was exterminated\n", c.Name)
 			continue
 		}
 		newCivs = append(newCivs, c)
@@ -123,7 +120,7 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 		}
 	}
 
-	ebitenutil.DrawRect(screen, float64(newX), float64(newY), 5.0, 5.0, col)
+	// vector.DrawFilledRect(screen, float32(newX), float32(newY), 1.0, 1.0, col, false)
 
 	if sys.Civ != nil {
 
@@ -133,7 +130,7 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 			float32(newX),
 			float32(newY),
 			float32(sr),
-			5,
+			10,
 			lowA,
 			false,
 		)
@@ -148,24 +145,24 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 			false,
 		)
 
-		text.Draw(
-			screen,
-			fmt.Sprintf("%v", int(sys.Population)),
-			mplusNormalFont,
-			int(newX),
-			int(newY)+30,
-			color.White,
-		)
+		// text.Draw(
+		// 	screen,
+		// 	fmt.Sprintf("%v", sys.Population),
+		// 	mplusNormalFont,
+		// 	int(newX),
+		// 	int(newY)+30,
+		// 	color.White,
+		// )
 	}
 	if sys.Cached.BestSys != nil {
-		text.Draw(
-			screen,
-			fmt.Sprintf("%v", int(sys.Cached.BestSysScore)),
-			mplusNormalFont,
-			int(newX),
-			int(newY),
-			color.White,
-		)
+		// text.Draw(
+		// 	screen,
+		// 	fmt.Sprintf("%v", sys.Cached.BestSysScore),
+		// 	mplusNormalFont,
+		// 	int(newX),
+		// 	int(newY),
+		// 	color.White,
+		// )
 
 		xx, yy := convertPoints(sys.Cached.BestSys.Point.X, sys.Cached.BestSys.Point.Y)
 
@@ -175,8 +172,8 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 			float32(newY),
 			float32(xx),
 			float32(yy),
-			3,
-			col,
+			1,
+			lowA,
 			false,
 		)
 	}

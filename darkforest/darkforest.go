@@ -87,7 +87,7 @@ func (s *System) OwnedSystemTic(game *Game) {
 	}
 
 	// Decrease discoverability
-	s.Discoverability -= 1.0 * ds
+	s.Discoverability -= 100.0 * ds
 
 	// Now we need sort all the non-owned systems based on systemscore
 	nonOwnedSystems := []*System{}
@@ -125,7 +125,7 @@ func (s *System) OwnedSystemTic(game *Game) {
 		best.Civ = nil
 		best.Population = 1
 
-		best.Discoverability *= 2
+		best.Discoverability += (best.Discoverability / 2)
 		best.Cached = CachedSysVals{}
 	}
 

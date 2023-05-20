@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
@@ -15,13 +14,13 @@ var (
 
 func main() {
 	systems := []*darkforest.System{}
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 5000; i++ {
 		s := darkforest.GenSystem(systems)
 		systems = append(systems, &s)
 	}
-	for _, s := range systems {
-		fmt.Println(s)
-	}
+	// for _, s := range systems {
+	// 	fmt.Println(s)
+	// }
 
 	g := &darkforest.Game{
 		Systems: systems,
