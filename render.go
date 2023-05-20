@@ -14,7 +14,7 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 
-	"github.com/rubensseva/go-dark-forest/civ"
+	"github.com/rubensseva/go-dark-forest/darkforest"
 )
 
 var (
@@ -50,12 +50,22 @@ func init() {
 }
 
 type Renderer struct{
-	game *Game
+	game *darkforest.Game
 }
 
 func (g *Renderer) Update() error {
+	newCivs := make([]*darkforest.Civ, 0, len(g.game.Civs))
 	for _, c := range g.game.Civs {
-		c.CivTic(g.game.Systems)
+		if len(c.OwnedSystems) == 0 {
+			fmt.Printf("civ %v was exterminated\n", c.Name)
+			continue
+		}
+		newCivs = append(newCivs, c)
+	}
+	g.game.Civs = newCivs
+
+	for _, c := range g.game.Civs {
+		c.CivTic(g.game)
 	}
 	// time.Sleep(100 * time.Millisecond)
 	return nil
@@ -80,19 +90,19 @@ func hash(s string) uint32 {
 
 
 func scalePoint(p float64) float64 {
-	facP := p / (float64(civ.MaxXAndY) + (float64(civ.MinXAndY) * (-1)))
+	facP := p / (float64(darkforest.MaxXAndY) + (float64(darkforest.MinXAndY) * (-1)))
 	return float64(ScreenWidthAndHeight) * facP
 }
 
 func convertPoints(x, y int64) (float64, float64) {
 	// Assuming minx and miny is negative
-	newX := float64(x + (civ.MinXAndY * (-1)))
-	newY := float64(y + (civ.MinXAndY * (-1)))
+	newX := float64(x + (darkforest.MinXAndY * (-1)))
+	newY := float64(y + (darkforest.MinXAndY * (-1)))
 
 	return scalePoint(newX), scalePoint(newY)
 }
 
-func renderSystem(screen *ebiten.Image, sys civ.System) {
+func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 	newX, newY := convertPoints(sys.Point.X, sys.Point.Y)
 
 	var col color.Color

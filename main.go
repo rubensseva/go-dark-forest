@@ -6,72 +6,52 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/rubensseva/go-dark-forest/civ"
+	"github.com/rubensseva/go-dark-forest/darkforest"
 )
 
 var (
-	WindowWidthAndHeight = 800
+	WindowWidthAndHeight = 1000
 )
 
-type Game struct {
-	Systems []*civ.System
-	Civs    []*civ.Civ
-}
-
-func addCiv(game *Game, firstSys *civ.System, civName string, col color.Color) {
-	firstSys.Population = 1
-	firstCiv := civ.Civ{
-		Name:             civName,
-		Color:            col,
-		TechnologyLevel:  0,
-		TechnologyGrowth: 0,
-		Population:       1,
-		OwnedSystems:     []*civ.System{firstSys},
-	}
-	firstSys.Civ = &firstCiv
-
-	game.Civs = append(game.Civs, &firstCiv)
-}
-
 func main() {
-	systems := []*civ.System{}
+	systems := []*darkforest.System{}
 	for i := 0; i < 200; i++ {
-		s := civ.GenSystem(systems)
+		s := darkforest.GenSystem(systems)
 		systems = append(systems, &s)
 	}
 	for _, s := range systems {
 		fmt.Println(s)
 	}
 
-	game := &Game{
+	g := &darkforest.Game{
 		Systems: systems,
 	}
 
-	addCiv(game, systems[0], "schmorp", color.RGBA{
+	darkforest.AddCiv(g, systems[0], "schmorp", color.RGBA{
 		R: 255,
 		A: 255,
 	})
-	addCiv(game, systems[1], "glorp", color.RGBA{
+	darkforest.AddCiv(g, systems[1], "glorp", color.RGBA{
 		G: 200,
 		A: 255,
 	})
-	addCiv(game, systems[2], "larp", color.RGBA{
+	darkforest.AddCiv(g, systems[2], "larp", color.RGBA{
 		B: 200,
 		A: 255,
 	})
-	addCiv(game, systems[3], "larp", color.RGBA{
+	darkforest.AddCiv(g, systems[3], "larp", color.RGBA{
 		R: 100,
 		B: 100,
 		A: 255,
 	})
-	addCiv(game, systems[4], "fjolp", color.RGBA{
+	darkforest.AddCiv(g, systems[4], "fjolp", color.RGBA{
 		R: 100,
 		G: 100,
 		A: 255,
 	})
 
 	renderer := Renderer{
-		game: game,
+		game: g,
 	}
 
 	ebiten.SetWindowSize(WindowWidthAndHeight, WindowWidthAndHeight)
