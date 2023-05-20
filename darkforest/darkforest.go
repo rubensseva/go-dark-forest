@@ -89,7 +89,6 @@ func (s *System) OwnedSystemTic(game *Game) {
 	// Decrease discoverability
 	s.Discoverability -= 1.0 * ds
 
-
 	// Now we need sort all the non-owned systems based on systemscore
 	nonOwnedSystems := []*System{}
 	for _, ss := range game.Systems {
@@ -135,7 +134,7 @@ func (s *System) OwnedSystemTic(game *Game) {
 	popresfac := float64(pop) / float64(resources)
 	needForExpansion := popresfac * expandThreshold
 
-	if needForExpansion + systemScore >= expandThreshold {
+	if needForExpansion+systemScore >= expandThreshold {
 		expand(s, best)
 	}
 

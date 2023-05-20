@@ -19,5 +19,5 @@ func (p Point) Sub(pp Point) Point {
 }
 
 func (p Point) VecLen() float64 {
-	return math.Sqrt(float64(p.X * p.X + p.Y * p.Y))
+	return math.Sqrt(float64(p.X*p.X + p.Y*p.Y))
 }

@@ -14,7 +14,7 @@ type Civ struct {
 	Cohesion         float64
 	OwnedSystems     []*System
 
-	LastUpdate       time.Time
+	LastUpdate time.Time
 }
 
 func (c *Civ) totalResources() int {

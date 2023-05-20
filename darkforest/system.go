@@ -16,21 +16,21 @@ var (
 )
 
 type CachedSysVals struct {
-		BestSys *System
-		BestSysScore float64
-		NeedForExpansion float64
+	BestSys          *System
+	BestSysScore     float64
+	NeedForExpansion float64
 }
 
 type System struct {
 	Name            string
 	Resources       int
 	Discoverability float64
-	Point               point.Point
+	Point           point.Point
 
-	LastUpdate      time.Time
+	LastUpdate time.Time
 
 	// These fields are only relevant if the system is owned
-	Civ *Civ // If nil, indicates unowned
+	Civ        *Civ // If nil, indicates unowned
 	Population int
 
 	// Cached results for rendering, should never be
@@ -95,7 +95,7 @@ func systemScore(o System, s System) float64 {
 }
 
 func sortSystems(o System, systems []*System) {
-	sorty := func (s1, s2 *System) bool {
+	sorty := func(s1, s2 *System) bool {
 		score1 := systemScore(o, *s1)
 		score2 := systemScore(o, *s2)
 		return score1 > score2

@@ -49,7 +49,7 @@ func init() {
 	}
 }
 
-type Renderer struct{
+type Renderer struct {
 	game *darkforest.Game
 }
 
@@ -81,13 +81,11 @@ func (g *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 	return ScreenWidthAndHeight, ScreenWidthAndHeight
 }
 
-
 func hash(s string) uint32 {
-        h := fnv.New32a()
-        h.Write([]byte(s))
-        return h.Sum32()
+	h := fnv.New32a()
+	h.Write([]byte(s))
+	return h.Sum32()
 }
-
 
 func scalePoint(p float64) float64 {
 	facP := p / (float64(darkforest.MaxXAndY) + (float64(darkforest.MinXAndY) * (-1)))
@@ -125,10 +123,7 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 		}
 	}
 
-
 	ebitenutil.DrawRect(screen, float64(newX), float64(newY), 5.0, 5.0, col)
-
-
 
 	if sys.Civ != nil {
 
@@ -158,7 +153,7 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 			fmt.Sprintf("%v", int(sys.Population)),
 			mplusNormalFont,
 			int(newX),
-			int(newY) + 30,
+			int(newY)+30,
 			color.White,
 		)
 	}
