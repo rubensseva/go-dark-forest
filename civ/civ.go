@@ -3,6 +3,7 @@ package civ
 import (
 	"fmt"
 	"image/color"
+	"time"
 
 	"github.com/rubensseva/go-dark-forest/point"
 	"golang.org/x/exp/slices"
@@ -29,13 +30,30 @@ type System struct {
 	Discoverability int
 	Point               point.Point
 
-	// If nil, indicates unowned
-	Civ *Civ
+	LastUpdate      time.Time
+
+	// These fields are only relevant if the system is owned
+	Civ *Civ // If nil, indicates unowned
 	Population int
 
 	// Cached results for rendering, should never be
 	// used in deciding anything
 	Cached CachedSysVals
+}
+
+func (s *System) Power() float64 {
+	if s.Civ == nil {
+		return 0
+	}
+	return float64(s.Civ.TechnologyLevel + s.Population + s.Resources)
+}
+
+func (s *System) ScanRange() float64 {
+	if s.Civ == nil {
+		return 0
+	}
+	scanFactor := 0.05
+	return s.Power() * scanFactor
 }
 
 func (c *Civ) totalResources() int {
@@ -89,23 +107,30 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 		panic(fmt.Sprintf("pop was zero for system %+v", s))
 	}
 
+	if s.LastUpdate.IsZero() {
+		s.LastUpdate = time.Now()
+	}
+	dt := time.Since(s.LastUpdate)
+	s.LastUpdate = time.Now()
+	ds := dt.Seconds()
+
 	pop := s.Population
 	resources := s.Resources
 
 	// First, grow the population
 	diff := resources - pop
-	growth := diff / 2
-	if growth <= 0 {
-		growth = 1
+	growth := (float64(diff) / 4.0) * ds
+	if growth <= 1.0 {
+		growth = 1.0
 	}
-	s.Population += growth
+	s.Population += int(growth)
 
 	// Now we decide what to do
 	// First: does this system even have a need for emigration?
-	wantsToExpand := resources < pop
-	if !wantsToExpand {
-		return
-	}
+	// wantsToExpand := resources < pop
+	// if !wantsToExpand {
+	// 	return
+	// }
 
 	// Now we need sort all the non-owned systems based on systemscore
 	nonOwnedSystems := []*System{}
@@ -121,7 +146,7 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	SortSystems(*s, nonOwnedSystems)
 
 	// Are there any systems available at all?
-	// If this there isnt, it means the whole universe is
+	// If there is not, it means the whole universe is
 	// currently colonized
 	if len(nonOwnedSystems) == 0 {
 		return
@@ -155,12 +180,14 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	needForExpansion := popresfac * expandThreshold
 
 	if needForExpansion + systemScore >= expandThreshold {
-		fmt.Printf("expanding civ %v... \n", s.Civ)
+		// fmt.Printf("expanding civ %v... \n", s.Civ)
 		best.Civ = s.Civ
 		s.Civ.OwnedSystems = append(s.Civ.OwnedSystems, best)
 		colonizingPop := s.Population / 2
 		s.Population -= colonizingPop
 		best.Population = colonizingPop
+
+		best.LastUpdate = time.Time{}
 	}
 
 	// Update cached data

@@ -5,7 +5,6 @@ import (
 	"hash/fnv"
 	"image/color"
 	"log"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -58,7 +57,7 @@ func (g *Renderer) Update() error {
 	for _, c := range g.game.Civs {
 		c.CivTic(g.game.Systems)
 	}
-	time.Sleep(100 * time.Millisecond)
+	// time.Sleep(100 * time.Millisecond)
 	return nil
 }
 
@@ -96,15 +95,37 @@ func renderSystem(screen *ebiten.Image, sys civ.System) {
 	newX, newY := convertPoints(sys.Point.X, sys.Point.Y)
 
 	var col color.Color
+	var lowA color.Color
 	if sys.Civ != nil {
 		col = sys.Civ.Color
+		r, g, b, _ := sys.Civ.Color.RGBA()
+		lowA = color.RGBA{
+			R: uint8(r),
+			G: uint8(g),
+			B: uint8(b),
+			A: 1,
+		}
 	} else {
 		col = color.Gray{
 			Y: 255,
 		}
+		lowA = color.Gray{
+			Y: 100,
+		}
 	}
 
+
 	ebitenutil.DrawRect(screen, float64(newX), float64(newY), 5.0, 5.0, col)
+
+	sr := sys.ScanRange()
+	ebitenutil.DrawCircle(
+		screen,
+		newX,
+		newY,
+		sr,
+		lowA,
+	)
+
 
 	if sys.Cached.BestSys != nil {
 		text.Draw(

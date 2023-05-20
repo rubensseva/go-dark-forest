@@ -3,6 +3,7 @@ package civ
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/rubensseva/go-dark-forest/point"
 )
@@ -17,13 +18,12 @@ var (
 	MinY = int64(-100)
 )
 
-
 func randRange(min int64, max int64) int64 {
 	return rand.Int63n(max-min) + min
 }
 
 func GenSystem(systems []*System) System {
-    var pnt point.Point
+	var pnt point.Point
 
 	for {
 		newP := point.Point{
@@ -34,7 +34,7 @@ func GenSystem(systems []*System) System {
 		for _, s := range systems {
 			lenn := newP.Sub(s.Point).VecLen()
 			if lenn < 10.0 {
-                fmt.Printf("%v is too close to %v\n", newP, s.Point)
+				fmt.Printf("%v is too close to %v\n", newP, s.Point)
 				toclose = true
 				break
 			}
@@ -44,7 +44,7 @@ func GenSystem(systems []*System) System {
 			continue
 		}
 
-        pnt = newP
+		pnt = newP
 		break
 	}
 
@@ -54,6 +54,8 @@ func GenSystem(systems []*System) System {
 		Name:            name,
 		Resources:       rand.Intn(1000),
 		Discoverability: rand.Intn(1000),
-		Point: pnt,
+		Point:           pnt,
+
+		LastUpdate: time.Now(),
 	}
 }
