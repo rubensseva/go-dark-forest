@@ -9,6 +9,10 @@ import (
 	"github.com/rubensseva/go-dark-forest/civ"
 )
 
+var (
+	WindowWidthAndHeight = 800
+)
+
 type Game struct {
 	Systems []*civ.System
 	Civs    []*civ.Civ
@@ -70,7 +74,7 @@ func main() {
 		game: game,
 	}
 
-	ebiten.SetWindowSize(800, 800)
+	ebiten.SetWindowSize(WindowWidthAndHeight, WindowWidthAndHeight)
 	ebiten.SetWindowTitle("Hello, World!")
 	if err := ebiten.RunGame(&renderer); err != nil {
 		log.Fatal(err)

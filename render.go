@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 
@@ -17,8 +18,7 @@ import (
 )
 
 var (
-	ScreenWidth = 1600
-	ScreenHeight = 1600
+	ScreenWidthAndHeight = 1600
 
 	mplusNormalFont font.Face
 	mplusBigFont    font.Face
@@ -68,7 +68,7 @@ func (g *Renderer) Draw(screen *ebiten.Image) {
 }
 
 func (g *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return ScreenWidth, ScreenHeight
+	return ScreenWidthAndHeight, ScreenWidthAndHeight
 }
 
 
@@ -79,16 +79,17 @@ func hash(s string) uint32 {
 }
 
 
+func scalePoint(p float64) float64 {
+	facP := p / (float64(civ.MaxXAndY) + (float64(civ.MinXAndY) * (-1)))
+	return float64(ScreenWidthAndHeight) * facP
+}
+
 func convertPoints(x, y int64) (float64, float64) {
 	// Assuming minx and miny is negative
-	newX := float64(x + (civ.MinX * (-1)))
-	newY := float64(y + (civ.MinY * (-1)))
+	newX := float64(x + (civ.MinXAndY * (-1)))
+	newY := float64(y + (civ.MinXAndY * (-1)))
 
-	facX := newX / (float64(civ.MaxX) + (float64(civ.MinX) * (-1)))
-	facY := newY / (float64(civ.MaxY) + (float64(civ.MinY) * (-1)))
-
-	resX, resY := float64(ScreenWidth) * facX, float64(ScreenHeight) * facY
-	return resX, resY
+	return scalePoint(newX), scalePoint(newY)
 }
 
 func renderSystem(screen *ebiten.Image, sys civ.System) {
@@ -100,9 +101,9 @@ func renderSystem(screen *ebiten.Image, sys civ.System) {
 		col = sys.Civ.Color
 		r, g, b, _ := sys.Civ.Color.RGBA()
 		lowA = color.RGBA{
-			R: uint8(r),
-			G: uint8(g),
-			B: uint8(b),
+			R: uint8(r) / 5,
+			G: uint8(g) / 5,
+			B: uint8(b) / 5,
 			A: 1,
 		}
 	} else {
@@ -117,16 +118,40 @@ func renderSystem(screen *ebiten.Image, sys civ.System) {
 
 	ebitenutil.DrawRect(screen, float64(newX), float64(newY), 5.0, 5.0, col)
 
-	sr := sys.ScanRange()
-	ebitenutil.DrawCircle(
-		screen,
-		newX,
-		newY,
-		sr,
-		lowA,
-	)
 
 
+	if sys.Civ != nil {
+
+		sr := scalePoint(sys.ScanRange())
+		vector.StrokeCircle(
+			screen,
+			float32(newX),
+			float32(newY),
+			float32(sr),
+			5,
+			lowA,
+			false,
+		)
+
+		sp := scalePoint(sys.Power()) * 0.001
+		vector.DrawFilledCircle(
+			screen,
+			float32(newX),
+			float32(newY),
+			float32(sp),
+			col,
+			false,
+		)
+
+		text.Draw(
+			screen,
+			fmt.Sprintf("%v", int(sys.Population)),
+			mplusNormalFont,
+			int(newX),
+			int(newY) + 30,
+			color.White,
+		)
+	}
 	if sys.Cached.BestSys != nil {
 		text.Draw(
 			screen,
@@ -136,24 +161,18 @@ func renderSystem(screen *ebiten.Image, sys civ.System) {
 			int(newY),
 			color.White,
 		)
-		text.Draw(
-			screen,
-			fmt.Sprintf("%v", int(sys.Population)),
-			mplusNormalFont,
-			int(newX),
-			int(newY) + 30,
-			color.White,
-		)
 
 		xx, yy := convertPoints(sys.Cached.BestSys.Point.X, sys.Cached.BestSys.Point.Y)
 
-		ebitenutil.DrawLine(
+		vector.StrokeLine(
 			screen,
-			newX,
-			newY,
-			xx,
-			yy,
+			float32(newX),
+			float32(newY),
+			float32(xx),
+			float32(yy),
+			3,
 			col,
+			false,
 		)
 	}
 }

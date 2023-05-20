@@ -12,10 +12,8 @@ var (
 	names1 = []string{"glorp", "schmorp", "floop", "gloop", "schmerp"}
 	names2 = []string{"flatul", "narbgslag", "TZZKTZ", "uuuundulgltl"}
 
-	MaxX = int64(100)
-	MinX = int64(-100)
-	MaxY = int64(100)
-	MinY = int64(-100)
+	MaxXAndY = int64(100)
+	MinXAndY = int64(-100)
 )
 
 func randRange(min int64, max int64) int64 {
@@ -27,8 +25,8 @@ func GenSystem(systems []*System) System {
 
 	for {
 		newP := point.Point{
-			X: randRange(MinX, MaxX),
-			Y: randRange(MinY, MaxY),
+			X: randRange(MinXAndY, MaxXAndY),
+			Y: randRange(MinXAndY, MaxXAndY),
 		}
 		toclose := false
 		for _, s := range systems {

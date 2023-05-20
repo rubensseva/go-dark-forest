@@ -52,7 +52,7 @@ func (s *System) ScanRange() float64 {
 	if s.Civ == nil {
 		return 0
 	}
-	scanFactor := 0.05
+	scanFactor := 0.02
 	return s.Power() * scanFactor
 }
 
@@ -125,30 +125,30 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	}
 	s.Population += int(growth)
 
-	// Now we decide what to do
-	// First: does this system even have a need for emigration?
-	// wantsToExpand := resources < pop
-	// if !wantsToExpand {
-	// 	return
-	// }
-
 	// Now we need sort all the non-owned systems based on systemscore
 	nonOwnedSystems := []*System{}
 	for _, ss := range allSystems {
 		if ss.Civ == s.Civ {
 			continue
 		}
+
+		dis := s.Point.Sub(ss.Point).VecLen()
+		if dis > s.ScanRange() {
+			continue
+		}
+
 		nonOwnedSystems = append(
 			nonOwnedSystems,
 			ss,
 		)
 	}
-	SortSystems(*s, nonOwnedSystems)
+	sortSystems(*s, nonOwnedSystems)
 
 	// Are there any systems available at all?
 	// If there is not, it means the whole universe is
 	// currently colonized
 	if len(nonOwnedSystems) == 0 {
+		s.Cached = CachedSysVals{}
 		return
 	}
 	// Let's get the best candidate for emigration
@@ -174,20 +174,13 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 		best.Cached = CachedSysVals{}
 	}
 
-	systemScore := SystemScore(*s, *best)
+	systemScore := systemScore(*s, *best)
 	expandThreshold := 1000.0
 	popresfac := float64(pop) / float64(resources)
 	needForExpansion := popresfac * expandThreshold
 
 	if needForExpansion + systemScore >= expandThreshold {
-		// fmt.Printf("expanding civ %v... \n", s.Civ)
-		best.Civ = s.Civ
-		s.Civ.OwnedSystems = append(s.Civ.OwnedSystems, best)
-		colonizingPop := s.Population / 2
-		s.Population -= colonizingPop
-		best.Population = colonizingPop
-
-		best.LastUpdate = time.Time{}
+		expand(s, best)
 	}
 
 	// Update cached data
@@ -196,8 +189,18 @@ func (s *System) OwnedSystemTic(allSystems []*System) {
 	s.Cached.NeedForExpansion = needForExpansion
 }
 
-// SystemScore calculates a value for a System.
-func SystemScore(o System, s System) float64 {
+func expand(expanding *System, target *System) {
+	target.Civ = expanding.Civ
+	expanding.Civ.OwnedSystems = append(expanding.Civ.OwnedSystems, target)
+	colonizingPop := expanding.Population / 2
+	expanding.Population -= colonizingPop
+	target.Population = colonizingPop
+
+	target.LastUpdate = time.Time{}
+}
+
+// systemScore calculates a value for a System.
+func systemScore(o System, s System) float64 {
 	distance := o.Point.Sub(s.Point).VecLen()
 	resources := float64(s.Resources)
 	discoverability := float64(s.Discoverability)
@@ -205,10 +208,10 @@ func SystemScore(o System, s System) float64 {
 	return resources - (distance * (distance / 4)) - discoverability
 }
 
-func SortSystems(o System, systems []*System) {
+func sortSystems(o System, systems []*System) {
 	sorty := func (s1, s2 *System) bool {
-		score1 := SystemScore(o, *s1)
-		score2 := SystemScore(o, *s2)
+		score1 := systemScore(o, *s1)
+		score2 := systemScore(o, *s2)
 		return score1 > score2
 	}
 	slices.SortFunc(systems, sorty)
