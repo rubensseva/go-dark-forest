@@ -120,7 +120,7 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 		}
 	}
 
-	// vector.DrawFilledRect(screen, float32(newX), float32(newY), 1.0, 1.0, col, false)
+	vector.DrawFilledRect(screen, float32(newX), float32(newY), 1.0, 1.0, col, false)
 
 	if sys.Civ != nil {
 
@@ -173,7 +173,7 @@ func renderSystem(screen *ebiten.Image, sys darkforest.System) {
 			float32(xx),
 			float32(yy),
 			1,
-			lowA,
+			col,
 			false,
 		)
 	}
