@@ -129,6 +129,9 @@ func GenSystem(systems []*System) System {
 			X: randRange(MinXAndY, MaxXAndY),
 			Y: randRange(MinXAndY, MaxXAndY),
 		}
+
+
+		// // Enforce some distance between systems
 		// toclose := false
 		// for _, s := range systems {
 		// 	lenn := newP.Sub(s.Point).VecLen()
